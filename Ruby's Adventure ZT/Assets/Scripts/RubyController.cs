@@ -1,6 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
+
 
 public class RubyController : MonoBehaviour
 {
@@ -9,12 +13,19 @@ public class RubyController : MonoBehaviour
     public int maxHealth = 5;
 
     public GameObject projectilePrefab;
+    public GameObject damageRubyPrefab;
+    public GameObject healRubyPrefab;
 
     public AudioClip throwSound;
     public AudioClip hitSound;
 
     public int health { get { return currentHealth; } }
     int currentHealth;
+
+    public int score;
+    //public GameObject scoreText;
+    public TMP_Text scoreText;
+    public GameObject gameOverText;
 
     public float timeInvincible = 2.0f;
     bool isInvincible;
@@ -23,6 +34,8 @@ public class RubyController : MonoBehaviour
     Rigidbody2D rigidbody2d;
     float horizontal;
     float vertical;
+
+    bool gameOver = false;
 
     Animator animator;
     Vector2 lookDirection = new Vector2(1, 0);
@@ -82,6 +95,14 @@ public class RubyController : MonoBehaviour
                 }
             }
         }
+
+        if (Input.GetKey(KeyCode.R))
+        {
+            if (gameOver == true)
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // this loads the currently active scene
+            }
+        }
     }
 
     void FixedUpdate()
@@ -95,6 +116,8 @@ public class RubyController : MonoBehaviour
 
     public void ChangeHealth(int amount)
     {
+
+
         if (amount < 0)
         {
             if (isInvincible)
@@ -102,13 +125,46 @@ public class RubyController : MonoBehaviour
 
             isInvincible = true;
             invincibleTimer = timeInvincible;
-
+            GameObject damageRubyObject = Instantiate(damageRubyPrefab, rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity); //damage particle code
             PlaySound(hitSound);
+        }
+        else if (amount > 0) //for heal particles
+        {
+            //heal particle thinggggggg
+            GameObject healRubyObject = Instantiate(healRubyPrefab, rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity);
         }
 
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
 
         UIHealthBar.instance.SetValue(currentHealth / (float)maxHealth);
+
+        if (currentHealth == 0) //note to self: if this doesnt work try currentHealth = 0
+        {
+            gameOverText.SetActive(true);
+            gameOverText.GetComponent<TMP_Text>().text = "You lost! Press R to Restart!";
+            speed = 0.0f;
+            gameOver = true;
+        }
+    }
+
+    public void ChangeScore(int scoreAmount)
+    {
+        
+        if (scoreAmount > 0) //increasing score
+        {
+            score += scoreAmount;
+        }
+
+        scoreText.text = "Fixed Robots: " + score.ToString();
+        //UIHealthBar.instance.SetValue(currentHealth / (float)maxHealth);
+
+        if (score == 2) //note to self: if this doesnt work try score = 2
+        {
+            gameOverText.SetActive(true);
+            gameOverText.GetComponent<TMP_Text>().text = "You Win! Created by Zachary Templin of Group 10";
+            speed = 0.0f;
+            gameOver = true;
+        }
     }
 
     void Launch()
