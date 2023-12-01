@@ -18,6 +18,8 @@ public class RubyController : MonoBehaviour
 
     public AudioClip throwSound;
     public AudioClip hitSound;
+    //public AudioClip poisonSound; //unused as it serves no purpose and also all of this is my code
+
 
     public int health { get { return currentHealth; } }
     int currentHealth;
@@ -41,6 +43,14 @@ public class RubyController : MonoBehaviour
     Vector2 lookDirection = new Vector2(1, 0);
 
     AudioSource audioSource;
+
+
+    //public int poisonCounter = 0;
+
+
+
+
+
 
     // Start is called before the first frame update
     void Start()
@@ -103,7 +113,13 @@ public class RubyController : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // this loads the currently active scene
             }
         }
+
+
+
     }
+
+
+
 
     void FixedUpdate()
     {
@@ -118,8 +134,10 @@ public class RubyController : MonoBehaviour
     {
 
 
-        if (amount < 0)
+        if (amount < 0 && amount != -2) //MODIFIED THIS TO INCREMENT A POISON DAMAGE OVER TIME EFFECT
         {
+            
+
             if (isInvincible)
                 return;
 
@@ -132,6 +150,26 @@ public class RubyController : MonoBehaviour
         {
             //heal particle thinggggggg
             GameObject healRubyObject = Instantiate(healRubyPrefab, rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity);
+        }
+        else if (amount <= -2) //POISON DOT EFFECT *attempt
+        {
+
+            
+              /*while(poisonCounter <= 3)
+              {
+               isInvincible = false;
+               poisonCounter += 1;
+              }*/
+            
+            if (isInvincible)
+            {
+                return;
+            }
+            isInvincible = true;
+            invincibleTimer = timeInvincible;
+            GameObject damageRubyObject = Instantiate(damageRubyPrefab, rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity); //damage particle code
+            PlaySound(hitSound);//temporary
+            //PlaySound(poisonSound); TURN THIS ON LATER
         }
 
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
